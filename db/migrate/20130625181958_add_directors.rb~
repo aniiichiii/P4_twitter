@@ -1,0 +1,9 @@
+class AddDirectors < ActiveRecord::Migration
+  def up
+    add_colum :movies, :director, :string
+  end
+
+  def down
+    drop_table :movies
+  end
+end

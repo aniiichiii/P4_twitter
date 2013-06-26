@@ -1,0 +1,16 @@
+%table#movies
+  %thead
+    %tr
+      %th Title
+      %th Rating
+      %th Release Date
+      %th Director
+  %tbody
+    - @movies.each do |movie|
+      %tr
+        %td= link_to movie.title, movies_path(:title=>movie.title), :method => :post
+        %td= movie.rating
+        %td= movie.release_date
+        %td= movie.director
+    = link_to 'Back to movie list', movies_path
+

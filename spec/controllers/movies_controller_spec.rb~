@@ -1,0 +1,104 @@
+require 'spec_helper'
+
+describe MoviesController do
+  
+  describe 'edit' do
+    it 'should call edit' do
+      Movie.should_receive(:find).with('2')
+      get :edit, {:id => '2'}
+    end
+
+  end
+  describe 'index' do
+    it 'should select the index template' do
+      Movie.should_receive(:find_all_by_rating)
+      get :index
+      response.should render_template('index')
+    end
+  end
+  
+  describe 'create' do
+    it 'movie should be nil' do
+      m=mock('Movie', :movie=>nil)
+      Movie.stub(:create!)
+      post :create
+      response.should redirect_to (movies_path)
+    end
+    it 'should select the index template' do
+      m=mock('Movie', :title=>'kill bill')
+      Movie.should_receive(:create!).and_return(m)
+      post :create, {:movie =>m}
+    end
+  end
+
+  describe 'directors' do
+    it 'should select the directors template' do
+      Movie.should_receive(:find_all_by_director).with('2')
+      get :directors, {:id => '2'}
+      response.should render_template('directors')
+    end
+    it 'director should be nil' do
+      m=mock('Movie')
+      Movie.stub(:find).with('2').and_return(m)
+      m.stub(:director).and_return(nil)
+      get :directors, {:search_terms => '2'}
+      response.should redirect_to (movies_path)
+    end
+  end
+  describe 'show' do
+    it 'should call show' do
+      Movie.should_receive(:find).with('2')
+      get :show, {:id => '2'}
+    end
+  end  
+
+  describe 'update' do
+    it 'should call update ' do
+      m=mock('Movie', :title =>'kill bill')
+      Movie.should_receive(:find).with('2').and_return(m)
+      m.stub(:update_attributes!)
+      put :update, {:id => '2'}
+      redirect_to (movie_path(m))
+    end
+  end 
+
+  describe 'destroy' do
+    it 'should call destroy' do
+      m=mock('Movie', :title =>'kill bill')
+      Movie.should_receive(:find).with('2').and_return(m)
+      m.stub(:destroy)
+      delete :destroy, {:id => '2'}
+      redirect_to (movies_path)
+    end
+
+  end    
+
+  describe 'searching TMDb' do
+    it 'should call the model method that performs TMDb search' do
+      Movie.should_receive(:find_in_tmdb).with('hardware')
+      post :search_tmdb, {:search_terms => 'hardware'}
+    end
+    it 'should select the Search Results template for rendering' do
+      Movie.stub(:find_in_tmdb)
+      post :search_tmdb, {:search_terms => 'hardware'}
+      response.should render_template('search_tmdb')
+    end
+    it 'should make the TMDb search results available to that template' do
+      fake_results = [mock('Movie'), mock('Movie')]
+      Movie.stub(:find_in_tmdb).and_return(fake_results)
+      post :search_tmdb, {:search_terms => 'hardware'}
+      # look for controller method to assign @movies
+      assigns(:movies).should == fake_results
+    end
+    it 'lalala'do
+      m=mock('Movie',:movies=>[])
+      Movie.should_receive(:find_in_tmdb).with('hardware').and_return(m)
+      post :search_tmdb, {:search_terms => 'hardware'}
+      redirect_to (movies_path)
+    end
+
+   
+
+  end
+end
+
